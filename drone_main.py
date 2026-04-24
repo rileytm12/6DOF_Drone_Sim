@@ -98,7 +98,7 @@ for i in range(n_steps):
     t_hist[i + 1] = (i + 1) * dt
     state_hist[i + 1, :] = state
 
-clean_state = [float(x) for x in x_dot]
+clean_state = [f"{float(x):.2f}" for x in state]
 print("Final state: ", clean_state)
 
 # Unpack position
