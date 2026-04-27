@@ -61,18 +61,20 @@ controllers = {
 
 # Logging
 t_hist = np.zeros(n_steps + 1)
-state_hist = np.zeros((n_steps + 1, 13))
+state_hist = np.zeros((n_steps + 1, len(state)))
 state_hist[0, :] = state
 
 # Per-step logs (one entry per control iteration)
 x_target_hist  = np.zeros(n_steps)
 y_target_hist  = np.zeros(n_steps)
 z_target_hist  = np.zeros(n_steps)
+wind_hist = np.zeros((n_steps, 2))
 
 print("Initial state: ", state)
 
 j=0
 target = [0.0, 0.0, 0.0]
+wind = [3.0, 3.0] # m/s in x, y directions
 
 for i in range(n_steps):
 
@@ -83,7 +85,7 @@ for i in range(n_steps):
     control_vec = innerLoop(state, target, params, controllers, dt)
 
     # Plant
-    x_dot = dynamics(state, control_vec)
+    x_dot, wind_hist[i, :] = dynamics(state, control_vec, wind)
 
     # Integrate
     state = integrator(state, x_dot, dt)
@@ -92,7 +94,7 @@ for i in range(n_steps):
     x_target_hist[i]  = target[0]
     y_target_hist[i]  = target[1]
     z_target_hist[i]  = target[2]
-
+    
     # Log state history
     t_hist[i + 1] = (i + 1) * dt
     state_hist[i + 1, :] = state
@@ -199,5 +201,22 @@ ax_xy.grid(True)
 ax_xy.legend()
 
 fig5.tight_layout()
+
+plt.show()
+
+########################################################
+# Figure 6: wind velocity vs time
+########################################################
+
+fig6, ax_wind = plt.subplots(figsize=(8, 4))
+
+ax_wind.plot(t_history_plot, wind_hist[:, 0], label='wind_x')
+ax_wind.plot(t_history_plot, wind_hist[:, 1], label='wind_y')
+ax_wind.set_xlabel('time [s]')
+ax_wind.set_ylabel('wind velocity [m/s]')
+ax_wind.set_title('Wind Velocity vs time')
+ax_wind.grid(True)
+ax_wind.legend()
+fig6.tight_layout()
 
 plt.show()
